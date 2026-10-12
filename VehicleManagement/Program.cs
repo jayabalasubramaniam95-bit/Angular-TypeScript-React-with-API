@@ -27,8 +27,20 @@ builder.Services.AddScoped<IVehicleCategoryRepository, VehicleCategoryRepository
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IManufacturerService, ManufacturerService>();
 builder.Services.AddScoped<IVehicleCategoryService, VehicleCategoryService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TypeScriptFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 var app = builder.Build();
 
+app.UseCors("TypeScriptFrontend");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -43,6 +55,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Vehicles}/{action=Index}/{id?}")
     .WithStaticAssets();
+
 
 
 app.Run();

@@ -19,4 +19,5 @@ public interface IManufacturerService
     void Create(ManufacturerFormViewModel model);
     bool Update(ManufacturerFormViewModel model);
     DeleteResult Delete(int id);
+    IReadOnlyList<ManufacturerOptionViewModel> GetActiveManufacturers();
 }

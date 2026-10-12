@@ -111,4 +111,15 @@ public class ManufacturerService : IManufacturerService
         _manufacturerRepository.Update(entity);
         return DeleteResult.Deleted;
     }
+    public IReadOnlyList<ManufacturerOptionViewModel>   GetActiveManufacturers()
+    {
+        return _manufacturerRepository
+            .GetAllManufacturer()
+            .Select(m => new ManufacturerOptionViewModel
+            {
+                Id = m.Id,
+                Name = m.Name
+            })
+            .ToList();
+    }
 }

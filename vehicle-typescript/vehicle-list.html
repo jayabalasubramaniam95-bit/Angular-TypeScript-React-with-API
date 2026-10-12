@@ -1,0 +1,67 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Management - Vehicle List</title>
+    <link rel="stylesheet" href="/src/vehicle-list.css" />
+  </head>
+  <body class="vehicle-list-page">
+    <header class="page-header">
+      <h1>Vehicle Management</h1>
+      <nav>
+        <a href="/">Add Vehicle</a>
+        <a href="/vehicle-list.html" aria-current="page">Vehicle List</a>
+      </nav>
+    </header>
+
+    <main class="vehicle-page">
+      <div class="page-title-row">
+        <div>
+          <h2>Vehicles</h2>
+          <p>Manage and view your registered vehicles.</p>
+        </div>
+        <a class="primary-button" href="/">+ Add Vehicle</a>
+      </div>
+
+      <form id="searchForm" class="search-form">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search vehicles..."
+          aria-label="Search vehicles"
+        />
+        <button type="submit">Search</button>
+        <button id="clearSearch" type="button">Clear</button>
+      </form>
+
+      <p id="statusMessage" role="status" aria-live="polite"></p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th><button data-sort="owner">Owner ↕</button></th>
+              <th><button data-sort="manufacturer">Manufacturer ↕</button></th>
+              <th><button data-sort="year">Year ↕</button></th>
+              <th><button data-sort="weight">Weight (kg) ↕</button></th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody id="vehicleTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span id="pageInfo"></span>
+        <div>
+          <button id="previousPage" type="button">Previous</button>
+          <button id="nextPage" type="button">Next</button>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="/src/vehicle-list.ts"></script>
+  </body>
+</html>

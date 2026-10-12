@@ -1,0 +1,45 @@
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 6%;
+  background: #172554;
+  color: white;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 0;
+}
+
+nav a.active {
+  border-bottom: 2px solid #93c5fd;
+}
+
+.main-content {
+  padding: 12px 20px;
+}
+
+@media (max-width: 600px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  nav {
+    flex-wrap: wrap;
+  }
+}

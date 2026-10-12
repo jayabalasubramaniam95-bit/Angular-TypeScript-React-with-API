@@ -1,0 +1,84 @@
+
+<section class="list-container">
+  <div class="list-heading">
+    <div>
+      <h2>Vehicle List</h2>
+      <p>View and search your registered vehicles.</p>
+    </div>
+
+    <a routerLink="/add-vehicle" class="add-button">+ Add Vehicle</a>
+  </div>
+
+  <form class="search-form" (ngSubmit)="searchVehicles()">
+    <input
+      type="search"
+      name="search"
+      [(ngModel)]="search"
+      placeholder="Search owner, manufacturer or category..."
+    />
+
+    <button type="submit">Search</button>
+  </form>
+
+  <p *ngIf="loading" class="info">Loading vehicles...</p>
+
+  <p *ngIf="errorMessage" class="error" role="alert">
+    {{ errorMessage }}
+  </p>
+
+  <div class="table-wrapper" *ngIf="!loading && !errorMessage">
+    <table>
+      <thead>
+        <tr>
+          <th><button class="sort-button" (click)="sortBy('owner')">Owner ↕</button></th>
+          <th><button class="sort-button" (click)="sortBy('manufacturer')">Manufacturer ↕</button></th>
+          <th><button class="sort-button" (click)="sortBy('year')">Year ↕</button></th>
+          <th><button class="sort-button" (click)="sortBy('weight')">Weight (kg) ↕</button></th>
+          <th>Category</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let vehicle of vehicles">
+          <td>{{ vehicle.ownerName }}</td>
+          <td>{{ vehicle.manufacturerName }}</td>
+          <td>{{ vehicle.yearOfManufacture }}</td>
+          <td>{{ vehicle.weight }}</td>
+          <td>
+            {{ vehicle.categoryIcon || '' }}
+            {{ vehicle.categoryName }}
+          </td>
+        </tr>
+
+        <tr *ngIf="vehicles.length === 0">
+          <td colspan="5" class="empty">
+            No vehicles found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="!loading && !errorMessage">
+    <span>
+      Total vehicles: {{ totalItems }} |
+      Page {{ currentPage }} of {{ totalPages }}
+    </span>
+
+    <div>
+      <button
+        type="button"
+        (click)="previousPage()"
+        [disabled]="currentPage <= 1">
+        Previous
+      </button>
+
+      <button
+        type="button"
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages">
+        Next
+      </button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,119 @@
+
+<section class="form-container">
+  <div class="form-heading">
+    <div>
+      <h2>Add Vehicle</h2>
+      <p>Enter the vehicle details below.</p>
+    </div>
+
+    <a routerLink="/vehicles" class="back-link">View Vehicles</a>
+  </div>
+
+  <div *ngIf="successMessage" class="message success" role="status">
+    {{ successMessage }}
+    <a routerLink="/vehicles">View vehicle list</a>
+  </div>
+
+  <div *ngIf="errorMessage" class="message error" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="loadingManufacturers" class="message">
+    Loading manufacturers...
+  </div>
+
+  <form [formGroup]="vehicleForm" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="ownerName">Owner Name *</label>
+      <input
+        id="ownerName"
+        type="text"
+        formControlName="ownerName"
+        placeholder="Enter owner name"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="vehicleForm.controls.ownerName.touched &&
+               vehicleForm.controls.ownerName.invalid">
+        Owner name is required and must be 100 characters or fewer.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="manufacturerId">Manufacturer *</label>
+      <select id="manufacturerId" formControlName="manufacturerId">
+        <option [ngValue]="null">Select manufacturer</option>
+        <option
+          *ngFor="let manufacturer of manufacturers"
+          [ngValue]="manufacturer.id">
+          {{ manufacturer.name }}
+        </option>
+      </select>
+
+      <small
+        class="field-error"
+        *ngIf="vehicleForm.controls.manufacturerId.touched &&
+               vehicleForm.controls.manufacturerId.invalid">
+        Please select a manufacturer.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="yearOfManufacture">Year of Manufacture *</label>
+      <input
+        id="yearOfManufacture"
+        type="number"
+        formControlName="yearOfManufacture"
+        min="1886"
+        max="2100"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="vehicleForm.controls.yearOfManufacture.touched &&
+               vehicleForm.controls.yearOfManufacture.invalid">
+        Enter a year between 1886 and 2100.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="weightKg">Weight (kg) *</label>
+      <input
+        id="weightKg"
+        type="number"
+        formControlName="weightKg"
+        min="0.01"
+        step="any"
+        placeholder="Enter weight in kilograms"
+      />
+
+      <small
+        class="field-error"
+        *ngIf="vehicleForm.controls.weightKg.touched &&
+               vehicleForm.controls.weightKg.invalid">
+        Weight must be greater than zero.
+      </small>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        [disabled]="saving || loadingManufacturers">
+        {{ saving ? 'Saving...' : 'Add Vehicle' }}
+      </button>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="vehicleForm.reset({
+          ownerName: '',
+          manufacturerId: null,
+          yearOfManufacture: currentYear,
+          weightKg: null
+        })">
+        Clear
+      </button>
+    </div>
+  </form>
+</section>

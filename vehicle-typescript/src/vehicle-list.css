@@ -1,0 +1,186 @@
+
+/* Vehicle List page only */
+.vehicle-list-page {
+  min-height: 100vh;
+  background: #f3f6fb;
+  color: #1f2937;
+  font-family: Arial, sans-serif;
+}
+
+.vehicle-list-page * {
+  box-sizing: border-box;
+}
+
+.vehicle-list-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 5%;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vehicle-list-page .page-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.vehicle-list-page .page-header nav {
+  display: flex;
+  gap: 20px;
+}
+
+.vehicle-list-page .page-header a {
+  color: #374151;
+  text-decoration: none;
+}
+
+.vehicle-list-page .page-header a[aria-current="page"] {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.vehicle-list-page .vehicle-page {
+  max-width: 1200px;
+  margin: 36px auto;
+  padding: 0 24px;
+}
+
+.vehicle-list-page .page-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.vehicle-list-page .page-title-row h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.vehicle-list-page .page-title-row p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.vehicle-list-page .primary-button,
+.vehicle-list-page .search-form button {
+  display: inline-block;
+  padding: 11px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
+  color: #374151;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vehicle-list-page .primary-button,
+.vehicle-list-page .search-form button[type="submit"] {
+  color: white;
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.vehicle-list-page .search-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vehicle-list-page .search-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
+  font: inherit;
+}
+
+.vehicle-list-page .table-container {
+  overflow-x: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 4%);
+}
+
+.vehicle-list-page table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.vehicle-list-page th,
+.vehicle-list-page td {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.vehicle-list-page th {
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.vehicle-list-page th button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vehicle-list-page tbody tr:hover {
+  background: #f8fafc;
+}
+
+.vehicle-list-page .pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.vehicle-list-page .pagination button {
+  margin-left: 6px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
+  cursor: pointer;
+}
+
+.vehicle-list-page button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vehicle-list-page #statusMessage {
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .vehicle-list-page .vehicle-page {
+    margin-top: 24px;
+    padding: 0 14px;
+  }
+
+  .vehicle-list-page .search-form {
+    flex-wrap: wrap;
+  }
+
+  .vehicle-list-page .search-form input {
+    flex-basis: 100%;
+  }
+}
