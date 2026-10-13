@@ -1,5 +1,6 @@
 
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -7,6 +8,7 @@ import {
   Validators
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize, timeout } from 'rxjs';
 import { VehicleApi, Manufacturer } from '../services/vehicle-api';
 
 @Component({
@@ -29,11 +31,21 @@ export class AddVehicle implements OnInit {
   currentYear = new Date().getFullYear();
 
   vehicleForm = this.fb.group({
-    ownerName: ['', [Validators.required, Validators.maxLength(100)]],
-    manufacturerId: [null as number | null, Validators.required],
+    ownerName: [
+      '',
+      [Validators.required, Validators.maxLength(100)]
+    ],
+    manufacturerId: [
+      null as number | null,
+      Validators.required
+    ],
     yearOfManufacture: [
       this.currentYear,
-      [Validators.required, Validators.min(1886), Validators.max(2100)]
+      [
+        Validators.required,
+        Validators.min(1886),
+        Validators.max(2100)
+      ]
     ],
     weightKg: [
       null as number | null,
@@ -42,22 +54,62 @@ export class AddVehicle implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadingManufacturers = true;
+    this.loadManufacturers();
+  }
 
-    this.api.getManufacturers().subscribe({
+  loadManufacturers(): void {
+    this.loadingManufacturers = true;
+    this.errorMessage = '';
+
+    this.api.getManufacturers().pipe(
+      timeout(10000),
+      finalize(() => {
+        this.loadingManufacturers = false;
+      })
+    ).subscribe({
       next: (manufacturers) => {
-        this.manufacturers = manufacturers;
-        this.loadingManufacturers = false;
+        this.manufacturers = manufacturers ?? [];
+
+        if (this.manufacturers.length === 0) {
+          this.errorMessage = 'No manufacturers are available.';
+        }
       },
-      error: () => {
-        this.errorMessage =
-          'Could not load manufacturers. Check that the .NET API is running.';
-        this.loadingManufacturers = false;
+      error: (error: unknown) => {
+        console.error('Manufacturer API error:', error);
+
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          error.name === 'TimeoutError'
+        ) {
+          this.errorMessage =
+            'Loading manufacturers timed out. Please try again.';
+        } else {
+          this.errorMessage =
+            'Could not load manufacturers. Please check the .NET API and try again.';
+        }
       }
     });
   }
 
+  clearForm(): void {
+    this.vehicleForm.reset({
+      ownerName: '',
+      manufacturerId: null,
+      yearOfManufacture: this.currentYear,
+      weightKg: null
+    });
+
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
   submit(): void {
+    if (this.saving || this.loadingManufacturers) {
+      return;
+    }
+
     this.successMessage = '';
     this.errorMessage = '';
 
@@ -77,42 +129,96 @@ export class AddVehicle implements OnInit {
       return;
     }
 
+    const ownerName = value.ownerName?.trim() ?? '';
+
+    if (!ownerName) {
+      this.vehicleForm.controls.ownerName.setValue('');
+      this.vehicleForm.controls.ownerName.markAsTouched();
+      this.errorMessage = 'Owner name is required.';
+      return;
+    }
+
     this.saving = true;
 
     this.api.addVehicle({
-      ownerName: value.ownerName!.trim(),
+      ownerName,
       manufacturerId: value.manufacturerId,
       yearOfManufacture: value.yearOfManufacture,
       weightKg: value.weightKg
-    }).subscribe({
+    }).pipe(
+      timeout(15000),
+      finalize(() => {
+        this.saving = false;
+      })
+    ).subscribe({
       next: () => {
         this.successMessage = 'Vehicle added successfully!';
+
         this.vehicleForm.reset({
           ownerName: '',
           manufacturerId: null,
           yearOfManufacture: this.currentYear,
           weightKg: null
         });
-        this.saving = false;
       },
-      error: (error) => {
-        const apiError = error.error;
+      error: (error: HttpErrorResponse) => {
+        console.error('Add vehicle API error:', error);
 
-        if (typeof apiError === 'string') {
-          this.errorMessage = apiError;
-        } else if (apiError?.errors) {
-          this.errorMessage = Object.values(apiError.errors)
-            .flat()
-            .join(' ');
-        } else {
+        if (error.name === 'TimeoutError') {
           this.errorMessage =
-            apiError?.message ||
-            apiError?.title ||
-            'Could not save the vehicle. Please check your details and try again.';
+            'The request took too long. Check the vehicle list before retrying.';
+          return;
         }
 
-        this.saving = false;
+        this.errorMessage = this.getApiErrorMessage(error);
       }
     });
+  }
+
+  private getApiErrorMessage(error: HttpErrorResponse): string {
+    const apiError: unknown = error.error;
+
+    if (typeof apiError === 'string' && apiError.trim()) {
+      return apiError;
+    }
+
+    if (typeof apiError === 'object' && apiError !== null) {
+      const body = apiError as {
+        title?: unknown;
+        message?: unknown;
+        errors?: unknown;
+      };
+
+      if (
+        typeof body.errors === 'object' &&
+        body.errors !== null
+      ) {
+        const messages = Object.values(
+          body.errors as Record<string, unknown>
+        ).flatMap((item) =>
+          Array.isArray(item) ? item : [item]
+        ).filter(
+          (item): item is string => typeof item === 'string'
+        );
+
+        if (messages.length > 0) {
+          return messages.join(' ');
+        }
+      }
+
+      if (typeof body.message === 'string') {
+        return body.message;
+      }
+
+      if (typeof body.title === 'string') {
+        return body.title;
+      }
+    }
+
+    if (error.status === 0) {
+      return 'Cannot connect to the API. Check that the .NET backend is running.';
+    }
+
+    return `Could not save the vehicle. HTTP ${error.status}. Please check your details and try again.`;
   }
 }

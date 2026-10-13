@@ -1,9 +1,19 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { VehicleApi, Vehicle, VehicleListResponse } from '../services/vehicle-api';
+import { finalize, timeout } from 'rxjs';
+import {
+  VehicleApi,
+  Vehicle,
+  VehicleListResponse
+} from '../services/vehicle-api';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -14,6 +24,7 @@ import { VehicleApi, Vehicle, VehicleListResponse } from '../services/vehicle-ap
 })
 export class VehicleList implements OnInit {
   private readonly api = inject(VehicleApi);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   vehicles: Vehicle[] = [];
   search = '';
@@ -29,48 +40,57 @@ export class VehicleList implements OnInit {
     this.loadVehicles();
   }
 
+  loadVehicles(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.cdRef.detectChanges();
 
-loadVehicles(): void {
-  this.loading = true;
-  this.errorMessage = '';
+    this.api.getVehicles(
+      this.search,
+      this.currentPage,
+      this.sortColumn,
+      this.sortDirection
+    ).pipe(
+      timeout(10000),
+      finalize(() => {
+        this.loading = false;
+        this.cdRef.detectChanges();
+      })
+    ).subscribe({
+      next: (response: VehicleListResponse) => {
+        console.log('Vehicle API response:', response);
 
-  this.api.getVehicles(
-    this.search,
-    this.currentPage,
-    this.sortColumn,
-    this.sortDirection
-  ).subscribe({
-   next: (response: Vehicle[] | VehicleListResponse) => {
-  const vehicleList = Array.isArray(response)
-    ? response
-    : response.vehicles;
+        this.vehicles = [...(response.vehicles ?? [])];
+        this.totalItems = response.totalItems ?? this.vehicles.length;
+        this.currentPage = response.currentPage ?? this.currentPage;
+        this.pageSize = response.pageSize ?? 10;
+        this.sortColumn = response.sortColumn ?? this.sortColumn;
+        this.sortDirection = response.sortDirection ?? this.sortDirection;
 
-  this.vehicles = vehicleList ?? [];
-  this.totalItems = Array.isArray(response)
-    ? response.length
-    : response.totalItems;
+        this.cdRef.detectChanges();
+      },
+      error: (error: unknown) => {
+        console.error('Failed to load vehicles:', error);
 
-  this.currentPage = Array.isArray(response)
-    ? 1
-    : response.currentPage;
+        this.vehicles = [];
 
-  this.pageSize = Array.isArray(response)
-    ? Math.max(response.length, 1)
-    : response.pageSize;
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          error.name === 'TimeoutError'
+        ) {
+          this.errorMessage =
+            'The vehicle API took too long to respond. Please try again.';
+        } else {
+          this.errorMessage =
+            'Could not load vehicles. Please check the API and try again.';
+        }
 
-  this.loading = false;
-},
-    error: (error) => {
-      console.error('Vehicle API request failed:', error);
-
-      this.errorMessage =
-        `Could not load vehicles. HTTP status: ${error.status || 'Unknown'}.`;
-
-      this.loading = false;
-    }
-  });
-}
-
+        this.cdRef.detectChanges();
+      }
+    });
+  }
 
   searchVehicles(): void {
     this.currentPage = 1;
@@ -91,14 +111,14 @@ loadVehicles(): void {
   }
 
   previousPage(): void {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 1 && !this.loading) {
       this.currentPage--;
       this.loadVehicles();
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages) {
+    if (this.currentPage < this.totalPages && !this.loading) {
       this.currentPage++;
       this.loadVehicles();
     }

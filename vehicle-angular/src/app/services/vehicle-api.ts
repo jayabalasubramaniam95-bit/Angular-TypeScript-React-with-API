@@ -1,7 +1,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, timeout } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export interface Manufacturer {
   id: number;
@@ -23,14 +23,20 @@ export interface Vehicle {
   weight: number;
   categoryName: string;
   categoryIcon?: string;
+  weightSortKey?: string;
 }
 
 export interface VehicleListResponse {
   vehicles: Vehicle[];
-  search: string;
+  search: string | null;
   currentPage: number;
   pageSize: number;
   totalItems: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  firstItem?: number;
+  lastItem?: number;
   sortColumn: string;
   sortDirection: string;
 }
@@ -48,19 +54,20 @@ export class VehicleApi {
   addVehicle(vehicle: VehicleRequest): Observable<unknown> {
     return this.http.post('/api/vehicles', vehicle);
   }
+
   getVehicles(
     search = '',
     page = 1,
     sortColumn = 'owner',
     sortDirection = 'asc'
-  ): Observable<VehicleListResponse | Vehicle[]> {
+  ): Observable<VehicleListResponse> {
     const params = new HttpParams()
       .set('search', search)
       .set('page', page)
       .set('sortColumn', sortColumn)
       .set('sortDirection', sortDirection);
 
-    return this.http.get<VehicleListResponse | Vehicle[]>(
+    return this.http.get<VehicleListResponse>(
       '/api/vehicles',
       { params }
     );

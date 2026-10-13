@@ -1,12 +1,15 @@
 
 <section class="list-container">
+
   <div class="list-heading">
     <div>
-      <h2>Vehicle List</h2>
+      <h2>Vehicle Management</h2>
       <p>View and search your registered vehicles.</p>
     </div>
 
-    <a routerLink="/add-vehicle" class="add-button">+ Add Vehicle</a>
+    <a routerLink="/add-vehicle" class="add-button">
+      + Add Vehicle
+    </a>
   </div>
 
   <form class="search-form" (ngSubmit)="searchVehicles()">
@@ -15,25 +18,82 @@
       name="search"
       [(ngModel)]="search"
       placeholder="Search owner, manufacturer or category..."
+      [disabled]="loading"
     />
 
-    <button type="submit">Search</button>
+    <button type="submit" [disabled]="loading">
+      Search
+    </button>
   </form>
 
-  <p *ngIf="loading" class="info">Loading vehicles...</p>
+  <p *ngIf="loading" class="info" role="status">
+    Loading vehicles...
+  </p>
 
   <p *ngIf="errorMessage" class="error" role="alert">
     {{ errorMessage }}
   </p>
 
-  <div class="table-wrapper" *ngIf="!loading && !errorMessage">
+  <div
+    class="table-wrapper"
+    *ngIf="!loading && !errorMessage"
+  >
+    <p class="vehicle-count">
+      Total vehicles: {{ totalItems }}
+      | Showing {{ vehicles.length }} on this page
+    </p>
+
     <table>
       <thead>
         <tr>
-          <th><button class="sort-button" (click)="sortBy('owner')">Owner ↕</button></th>
-          <th><button class="sort-button" (click)="sortBy('manufacturer')">Manufacturer ↕</button></th>
-          <th><button class="sort-button" (click)="sortBy('year')">Year ↕</button></th>
-          <th><button class="sort-button" (click)="sortBy('weight')">Weight (kg) ↕</button></th>
+          <th>
+            <button
+              type="button"
+              class="sort-button"
+              (click)="sortBy('owner')">
+              Owner
+              {{ sortColumn === 'owner'
+                ? (sortDirection === 'asc' ? '↑' : '↓')
+                : '↕' }}
+            </button>
+          </th>
+
+          <th>
+            <button
+              type="button"
+              class="sort-button"
+              (click)="sortBy('manufacturer')">
+              Manufacturer
+              {{ sortColumn === 'manufacturer'
+                ? (sortDirection === 'asc' ? '↑' : '↓')
+                : '↕' }}
+            </button>
+          </th>
+
+          <th>
+            <button
+              type="button"
+              class="sort-button"
+              (click)="sortBy('year')">
+              Year
+              {{ sortColumn === 'year'
+                ? (sortDirection === 'asc' ? '↑' : '↓')
+                : '↕' }}
+            </button>
+          </th>
+
+          <th>
+            <button
+              type="button"
+              class="sort-button"
+              (click)="sortBy('weight')">
+              Weight (kg)
+              {{ sortColumn === 'weight'
+                ? (sortDirection === 'asc' ? '↑' : '↓')
+                : '↕' }}
+            </button>
+          </th>
+
           <th>Category</th>
         </tr>
       </thead>
@@ -44,10 +104,7 @@
           <td>{{ vehicle.manufacturerName }}</td>
           <td>{{ vehicle.yearOfManufacture }}</td>
           <td>{{ vehicle.weight }}</td>
-          <td>
-            {{ vehicle.categoryIcon || '' }}
-            {{ vehicle.categoryName }}
-          </td>
+          <td>{{ vehicle.categoryName }}</td>
         </tr>
 
         <tr *ngIf="vehicles.length === 0">
@@ -59,9 +116,11 @@
     </table>
   </div>
 
-  <div class="pagination" *ngIf="!loading && !errorMessage">
+  <div
+    class="pagination"
+    *ngIf="!loading && !errorMessage"
+  >
     <span>
-      Total vehicles: {{ totalItems }} |
       Page {{ currentPage }} of {{ totalPages }}
     </span>
 
@@ -69,16 +128,17 @@
       <button
         type="button"
         (click)="previousPage()"
-        [disabled]="currentPage <= 1">
+        [disabled]="currentPage <= 1 || loading">
         Previous
       </button>
 
       <button
         type="button"
         (click)="nextPage()"
-        [disabled]="currentPage >= totalPages">
+        [disabled]="currentPage >= totalPages || loading">
         Next
       </button>
     </div>
   </div>
+
 </section>

@@ -6,79 +6,118 @@
       <p>Enter the vehicle details below.</p>
     </div>
 
-    <a routerLink="/vehicles" class="back-link">View Vehicles</a>
+    <a routerLink="/vehicles" class="back-link">
+      View Vehicles
+    </a>
   </div>
 
-  <div *ngIf="successMessage" class="message success" role="status">
+  <div
+    *ngIf="successMessage"
+    class="message success"
+    role="status"
+  >
     {{ successMessage }}
     <a routerLink="/vehicles">View vehicle list</a>
   </div>
 
-  <div *ngIf="errorMessage" class="message error" role="alert">
+  <div
+    *ngIf="errorMessage"
+    class="message error"
+    role="alert"
+  >
     {{ errorMessage }}
+
+    <button
+      *ngIf="!loadingManufacturers && manufacturers.length === 0"
+      type="button"
+      class="secondary-button"
+      (click)="loadManufacturers()"
+    >
+      Retry loading manufacturers
+    </button>
   </div>
 
-  <div *ngIf="loadingManufacturers" class="message">
+  <div *ngIf="loadingManufacturers" class="message" role="status">
     Loading manufacturers...
   </div>
 
   <form [formGroup]="vehicleForm" (ngSubmit)="submit()">
     <div class="field">
       <label for="ownerName">Owner Name *</label>
+
       <input
         id="ownerName"
         type="text"
         formControlName="ownerName"
         placeholder="Enter owner name"
+        maxlength="100"
       />
 
       <small
         class="field-error"
-        *ngIf="vehicleForm.controls.ownerName.touched &&
-               vehicleForm.controls.ownerName.invalid">
+        *ngIf="
+          vehicleForm.controls.ownerName.touched &&
+          vehicleForm.controls.ownerName.invalid
+        "
+      >
         Owner name is required and must be 100 characters or fewer.
       </small>
     </div>
 
     <div class="field">
       <label for="manufacturerId">Manufacturer *</label>
-      <select id="manufacturerId" formControlName="manufacturerId">
+
+      <select
+        id="manufacturerId"
+        formControlName="manufacturerId"
+      >
         <option [ngValue]="null">Select manufacturer</option>
+
         <option
           *ngFor="let manufacturer of manufacturers"
-          [ngValue]="manufacturer.id">
+          [ngValue]="manufacturer.id"
+        >
           {{ manufacturer.name }}
         </option>
       </select>
 
       <small
         class="field-error"
-        *ngIf="vehicleForm.controls.manufacturerId.touched &&
-               vehicleForm.controls.manufacturerId.invalid">
+        *ngIf="
+          vehicleForm.controls.manufacturerId.touched &&
+          vehicleForm.controls.manufacturerId.invalid
+        "
+      >
         Please select a manufacturer.
       </small>
     </div>
 
     <div class="field">
       <label for="yearOfManufacture">Year of Manufacture *</label>
+
       <input
         id="yearOfManufacture"
         type="number"
         formControlName="yearOfManufacture"
         min="1886"
         max="2100"
+        step="1"
       />
 
       <small
         class="field-error"
-        *ngIf="vehicleForm.controls.yearOfManufacture.touched &&
-               vehicleForm.controls.yearOfManufacture.invalid">
+        *ngIf="
+          vehicleForm.controls.yearOfManufacture.touched &&
+          vehicleForm.controls.yearOfManufacture.invalid
+        "
+      >
         Enter a year between 1886 and 2100.
       </small>
     </div>
 
     <div class="field">
       <label for="weightKg">Weight (kg) *</label>
+
       <input
         id="weightKg"
         type="number"
@@ -90,8 +129,11 @@
 
       <small
         class="field-error"
-        *ngIf="vehicleForm.controls.weightKg.touched &&
-               vehicleForm.controls.weightKg.invalid">
+        *ngIf="
+          vehicleForm.controls.weightKg.touched &&
+          vehicleForm.controls.weightKg.invalid
+        "
+      >
         Weight must be greater than zero.
       </small>
     </div>
@@ -99,19 +141,21 @@
     <div class="form-actions">
       <button
         type="submit"
-        [disabled]="saving || loadingManufacturers">
+        [disabled]="
+          saving ||
+          loadingManufacturers ||
+          manufacturers.length === 0
+        "
+      >
         {{ saving ? 'Saving...' : 'Add Vehicle' }}
       </button>
 
       <button
         type="button"
         class="secondary-button"
-        (click)="vehicleForm.reset({
-          ownerName: '',
-          manufacturerId: null,
-          yearOfManufacture: currentYear,
-          weightKg: null
-        })">
+        [disabled]="saving"
+        (click)="clearForm()"
+      >
         Clear
       </button>
     </div>
